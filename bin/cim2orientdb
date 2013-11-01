@@ -1,0 +1,61 @@
+#!/usr/bin/env ruby
+#
+# cim2orientdb
+#
+#  Import cim information into OrientDB
+#
+# Copyright (c) 2013 Klaus Kämpf <kkaempf@suse.de>
+#
+# Licensed under the Ruby license
+#
+
+require 'rubygems'
+
+$:.push(File.join(File.dirname(__FILE__), '..', 'lib'))
+$:.push "/abuild/projects/cmdb/orientdb4r/lib"
+require 'cim2orientdb'
+
+INCLUDE="/usr/share/cim/cim-current"
+
+options = CIM2OrientDB::Options.new
+
+client = CIM2OrientDB::Client.new options
+
+if options.clean
+  begin
+    if client.dbclient.get_database :database => options.database, :user => options.user, :password => options.password
+      resp = client.dbclient.delete_database :database => options.database, :user => options.user, :password => options.password
+    end
+  rescue Orientdb4r::ServerError => e
+    puts "Database does not exist?: #{e}"
+  rescue Orientdb4r::UnauthorizedError => e
+    puts "Wrong credentials or database does not exist: #{e}"
+  end
+  puts
+  puts "Creating #{options.database} now"
+  resp = client.dbclient.create_database :database => options.database, :user => options.user, :password => options.password, :storage => :local, :type => :graph
+end
+
+begin
+  client.connect
+rescue Orientdb4r::ConnectionError
+  STDERR.puts "Can't connect to database, is orientdb running ?!"
+  exit 1
+end
+
+if ARGV.empty?
+  STDERR.puts "No cim file or path given"
+  exit 0
+end
+
+begin
+  ARGV.each do |path|
+    CIM2OrientDB::Importer.new client.dbclient, path, options.includes + [ INCLUDE ], options.scheme
+  end
+rescue Exception => e
+  STDERR.puts "Import failed: #{e}"
+  trace = $@.join("\n\t")
+  STDERR.puts "At #{trace}"
+ensure
+  client.disconnect
+end
