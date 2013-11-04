@@ -15,8 +15,6 @@ $:.push(File.join(File.dirname(__FILE__), '..', 'lib'))
 $:.push "/abuild/projects/cmdb/orientdb4r/lib"
 require 'cim2orientdb'
 
-INCLUDE="/usr/share/cim/cim-current"
-
 options = CIM2OrientDB::Options.new
 
 client = CIM2OrientDB::Client.new options
@@ -50,7 +48,7 @@ end
 
 begin
   ARGV.each do |uri|
-    CIM2OrientDB::Discover.new client.dbclient, uri, options.includes + [ INCLUDE ]
+    CIM2OrientDB::Discover.new client.dbclient, uri, options.includes
   end
 rescue Exception => e
   STDERR.puts "Import failed: #{e}"
