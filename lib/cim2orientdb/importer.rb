@@ -9,53 +9,67 @@ require 'cim'
 
 module CIM2OrientDB
   class Importer
-    QUALIFIERS = "/usr/share/cim/cim-current/qualifiers.cim"
 
-    def initialize client, includes = []
+    def initialize client
       @client = client
-      @includes = includes
     end # initialize
 
     # save instance (or objectpath)
     def save element
-      puts "Import.save #{element}"
-      # class hierachy
-      create_class_hierachy element.class
+      puts "Import.save #{element}<#{element.class}"
       element.properties.each do |prop|
         # document
       end
     end
     
-    # find and parse mof for klass
-    def parse_mof_for klass
-      return
-      parser = MOF::Parser.new :style => :cim, :includes => @includes, :quiet => true
-      result = parser.parse [ QUALIFIERS, filename ]
-      result.each_value do |res|      # key: filename, value: result
-        res.classes.each do |klass|
-          @@classes[klass.name] = klass
-        end
-      end
-    end
-
     # create class hierachy
     def get_class klass
       begin
         @client.get_class klass
+        true
       rescue Orientdb4r::NotFoundError
         # return nil
       end
     end
     
-#      rescue
-#        properties = Array.new
-#        klass.properties.each do |prop|
-#          { :property => "name", :type => :string, :notnull => true, :mandatory => true },
-#          { :property => "scheme", :type => :string },
-#          { :property => "superclass", :type => :string }
-#        end
-#        client.create_class klass, :extends => klass.superclass, :properties => properties
-#      end
-#    end
+    def create_class mof
+      puts "create_class #{mof.name}"
+      properties = Array.new
+      mof.features.each do |prop|
+        p = Hash.new
+        p[:property] = prop.name
+        if prop.key?
+          p[:mandatory] = true 
+          p[:notnull] = true
+        end
+        p[:type] = case prop.type.type
+                   when :string
+                     :string
+                   when :uint64, :uint32, :uint16, :uint8
+                     :decimal
+                   when :int64
+                     :long
+                   when :int32
+                     :integer
+                   when :int16
+                     :short
+                   when :int8
+                     :byte
+                   else
+                     abort "Type #{prop.type} unsupported"
+                   end
+        options = Hash.new
+        options[:properties] = properties
+        options[:extends] = mof.superclass if mof.superclass
+        options[:abstract] = true if mof.name =~ /^CIM_/
+        begin
+          @client.create_class mof.name, options
+        rescue Exception => e
+          unless e.to_s =~ /already exists/
+            puts "Class creation failed with #{e.class}:#{e}"
+          end
+        end
+      end
+    end
   end
 end

@@ -24,10 +24,12 @@ module CIM2OrientDB
                raise "Can't determine classname from #{objectpath}<#{objectpath.class}>"
              end
            end
-      return if @import.get_class(cn) # class exists
+      klass = @import.get_class(cn) # class exists
+#      puts "#{cn} => #{klass.inspect}"
+      return if klass
       mof = @mof.get cn
       raise "Cannot find MOF for #{cn}" unless mof
-      puts "Found #{cn}"
+#      puts "Found #{cn}"
       if mof.superclass
         return create_class_hierachy mof.superclass
       else
