@@ -30,11 +30,8 @@ module CIM2OrientDB
       mof = @mof.get cn
       raise "Cannot find MOF for #{cn}" unless mof
 #      puts "Found #{cn}"
-      if mof.superclass
-        return create_class_hierachy mof.superclass
-      else
-        @import.create_class mof
-      end
+      create_class_hierachy mof.superclass if mof.superclass
+      @import.create_class mof
     end
     # import instance
     # create class hierachy

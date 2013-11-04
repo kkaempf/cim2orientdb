@@ -47,14 +47,22 @@ module CIM2OrientDB
                      :string
                    when :uint64, :uint32, :uint16, :uint8
                      :decimal
-                   when :int64
+                   when :sint64
                      :long
-                   when :int32
+                   when :sint32
                      :integer
-                   when :int16
+                   when :sint16
                      :short
-                   when :int8
+                   when :sint8
                      :byte
+                   when :dateTime
+                     :datetime
+                   when :boolean
+                     :boolean
+                   when :real32
+                     :float
+                   when :real64
+                     :double
                    else
                      abort "Type #{prop.type} unsupported"
                    end
