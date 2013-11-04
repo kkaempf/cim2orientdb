@@ -16,7 +16,7 @@ module CIM2OrientDB
 
     # save instance (or objectpath)
     def save element
-      puts "Import.save #{element}<#{element.class}>"
+#      puts "Import.save #{element}<#{element.class}>"
       # convert element to hash (for to_json)
       doc = Hash.new
       element.properties.each do |name, value|
@@ -40,7 +40,7 @@ module CIM2OrientDB
     end
     
     def create_class mof
-      puts "create_class #{mof.name}"
+#      puts "create_class #{mof.name}"
       properties = Array.new
       mof.features.each do |prop|
         p = Hash.new
@@ -73,18 +73,23 @@ module CIM2OrientDB
                    else
                      abort "Type #{prop.type} unsupported"
                    end
-        options = Hash.new
-        options[:properties] = properties
-        options[:extends] = mof.superclass if mof.superclass
-        options[:abstract] = true if mof.name =~ /^CIM_/
-        begin
-          @client.create_class mof.name, options
-        rescue Exception => e
-          unless e.to_s =~ /already exists/
-            puts "Class creation failed with #{e.class}:#{e}"
-          end
+      end
+      options = Hash.new
+      options[:properties] = properties
+      options[:extends] = mof.superclass ? mof.superclass : "V"
+      options[:abstract] = true if mof.name =~ /^CIM_/
+      begin
+        return @client.create_class mof.name, options
+      rescue Exception => e
+        unless e.to_s =~ /already exists/
+          puts "Class creation failed with #{e.class}:#{e}"
         end
       end
+    end
+    
+    def create_edge from, to
+#      puts "Importer.create_edge #{from.rid} -> #{to.rid}"
+      @client.create_edge from, to
     end
   end
 end

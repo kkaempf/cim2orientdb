@@ -25,25 +25,32 @@ module CIM2OrientDB
              end
            end
       klass = @import.get_class(cn) # class exists
-#      puts "#{cn} => #{klass.inspect}"
+      puts "#{cn} => #{klass.inspect}"
       return if klass
       mof = @mof.get cn
       raise "Cannot find MOF for #{cn}" unless mof
-#      puts "Found #{cn}"
+
       create_class_hierachy mof.superclass if mof.superclass
-      @import.create_class mof
+      puts "Create! #{cn}"
+      klass = @import.create_class mof
+#      puts "Created #{cn} as #{klass}"
+      klass
     end
     # import instance
     # create class hierachy
     def import_instance inst
-      klass = inst.classname      
+      klass = inst.classname
       create_class_hierachy inst.object_path
       @import.save inst
     end
     
-    def import_association from, to
-      vertex = import_instance to
-      @import.create_edge from, to
+    def import_associations inst, from
+      @wbem.each_association inst.object_path do |assoc|
+        puts "Assoc #{assoc.class}"
+        to = import_instance assoc
+        @import.create_edge from, to
+#        import_associations assoc, to
+      end
     end
 
     public
@@ -72,9 +79,7 @@ module CIM2OrientDB
         puts "Instance: #{inst}"
         from = import_instance inst
         puts "#{inst} saved as #{from}"
-#        @wbem.each_association inst do |assoc|
-#          import_association from, assoc
-#        end
+        import_associations inst, from
       end
     end
   end
