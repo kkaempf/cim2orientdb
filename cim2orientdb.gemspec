@@ -15,9 +15,21 @@ Gem::Specification.new do |s|
 
   s.rubyforge_project = "cim2orientdb"
 
+  s.required_rubygems_version = ">= 1.3.6"
+  s.add_development_dependency("yard", [">= 0.5"])
+  s.add_dependency("wbem", [">= 0.3.1"])
+
   s.files         = `git ls-files`.split("\n")
   s.files.reject! { |fn| fn == '.gitignore' }
   s.extra_rdoc_files    = Dir['README.md', 'LICENSE']
   s.executables   = `git ls-files -- bin/*`.split("\n").map{ |f| File.basename(f) }
   s.require_paths = ["lib"]
+
+  s.post_install_message = <<-POST_INSTALL_MESSAGE
+  ____
+/@    ~-.
+\/ __ .- | remember to have fun! 
+ // //  @  
+
+  POST_INSTALL_MESSAGE
 end

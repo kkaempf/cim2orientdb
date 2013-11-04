@@ -49,8 +49,8 @@ if ARGV.empty?
 end
 
 begin
-  ARGV.each do |path|
-    CIM2OrientDB::Importer.new client.dbclient, path, options.includes + [ INCLUDE ], options.scheme
+  ARGV.each do |uri|
+    CIM2OrientDB::Discover.new client.dbclient, uri, options.includes + [ INCLUDE ]
   end
 rescue Exception => e
   STDERR.puts "Import failed: #{e}"

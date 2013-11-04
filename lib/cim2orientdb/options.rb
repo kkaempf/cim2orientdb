@@ -9,10 +9,13 @@ require 'uri'
 
 module CIM2OrientDB
   class Options
-    attr_reader :target, :user, :password, :database, :includes, :scheme, :clean
+    attr_reader :target, :user, :password, :database, :includes, :clean
 
     def initialize
       @includes = Array.new
+      @database = "cmdb"
+      @user = "cmdb"
+      @password = "susemanager"
       # Parse command line options
       GetoptLong.new(
         [ '-h', '--help', GetoptLong::NO_ARGUMENT ],
@@ -22,7 +25,6 @@ module CIM2OrientDB
         [ '-p', '--pass', '--password', GetoptLong::REQUIRED_ARGUMENT ],
         [ '-d', '--db', '--database', GetoptLong::REQUIRED_ARGUMENT ],
         [ '-I', '--include', GetoptLong::REQUIRED_ARGUMENT ],
-        [ '-s', '--scheme', GetoptLong::REQUIRED_ARGUMENT ],
         [ '-c', '--clean', GetoptLong::NO_ARGUMENT ]
       ).each do |opt, arg|
         case opt
@@ -36,8 +38,6 @@ module CIM2OrientDB
           @database = arg
         when '-I'
           @includes << arg
-        when '-s'
-          @scheme = arg
         when '-c'
           @clean = true
         else
