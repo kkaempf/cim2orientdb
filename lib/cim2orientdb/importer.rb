@@ -16,9 +16,16 @@ module CIM2OrientDB
 
     # save instance (or objectpath)
     def save element
-      puts "Import.save #{element}<#{element.class}"
-      element.properties.each do |prop|
-        # document
+      puts "Import.save #{element}<#{element.class}>"
+      # convert element to hash (for to_json)
+      doc = Hash.new
+      element.properties.each do |name, value|
+        doc[name] = value.to_s
+      end
+      begin
+        @client.insert element.classname, doc
+      rescue Exception => e
+        puts "insert failed with #{e.class}:#{e}"
       end
     end
     

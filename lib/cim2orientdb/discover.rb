@@ -71,9 +71,10 @@ module CIM2OrientDB
       @wbem.each_instance(ns, cimclass) do |inst|
         puts "Instance: #{inst}"
         from = import_instance inst
-        @wbem.each_association inst do |assoc|
-          import_association from, assoc
-        end
+        puts "#{inst} saved as #{from}"
+#        @wbem.each_association inst do |assoc|
+#          import_association from, assoc
+#        end
       end
     end
   end
