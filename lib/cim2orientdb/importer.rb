@@ -14,12 +14,35 @@ module CIM2OrientDB
       @client = client
     end # initialize
 
+    # find instance (or objectpath)
+    def lookup element
+#      puts "Import.lookup #{element}<#{element.class}>"
+      # convert element keys to hash (for to_json)
+      doc = Hash.new
+      op = element.is_a?(Sfcc::Cim::Instance) ? element.object_path : element
+      op.each_key do |name, value|
+        doc[name] = value.to_s
+      end
+      begin
+        @client.lookup element.classname, doc
+      rescue Exception => e
+        puts "lookup failed with #{e.class}:#{e}"
+      end
+    end
+      
     # save instance (or objectpath)
     def save element
 #      puts "Import.save #{element}<#{element.class}>"
       # convert element to hash (for to_json)
       doc = Hash.new
-      element.properties.each do |name, value|
+      op = element.is_a?(Sfcc::Cim::Instance) ? element.object_path : element
+      op.each_key do |name, value|
+        doc[name] = value.to_s
+      end
+      res = @client.lookup element.classname, doc
+      return res if res
+      doc = Hash.new
+      element.each_property do |name, value|
         doc[name] = value.to_s
       end
       begin
