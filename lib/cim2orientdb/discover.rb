@@ -45,11 +45,12 @@ module CIM2OrientDB
     end
     
     def import_associations inst, from
+      puts "Import associations from #{inst}"
       @wbem.each_association inst.object_path do |assoc|
-        puts "Assoc #{assoc.class}"
+        puts "Assoc #{assoc.class}:#{assoc}"
         to = import_instance assoc
         @import.create_edge from, to
-#        import_associations assoc, to
+        import_associations assoc, to
       end
     end
 
