@@ -28,6 +28,9 @@ if options.clean
     puts "Database does not exist?: #{e}"
   rescue Orientdb4r::UnauthorizedError => e
     puts "Wrong credentials or database does not exist: #{e}"
+  rescue Orientdb4r::ConnectionError
+    abort "Can't connect to database, is orientdb running ?!"
+  rescue Exception => e
   end
   puts
   puts "Creating #{options.database} now"
@@ -37,8 +40,7 @@ end
 begin
   client.connect
 rescue Orientdb4r::ConnectionError
-  STDERR.puts "Can't connect to database, is orientdb running ?!"
-  exit 1
+  abort "Can't connect to database, is orientdb running ?!"
 end
 
 if ARGV.empty?
