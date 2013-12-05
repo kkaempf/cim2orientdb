@@ -21,7 +21,7 @@ module CIM2OrientDB
              begin
                op_or_cn.classname # is an objectpath
              rescue
-               raise "Can't determine classname from #{objectpath}<#{objectpath.class}>"
+               raise "Can't determine classname from #{op_or_cn}<#{op_or_cn.class}>"
              end
            end
       klass = @import.get_class(cn) # class exists
@@ -39,17 +39,17 @@ module CIM2OrientDB
     # import instance
     # create class hierachy
     def import_instance inst
-      klass = inst.classname
       create_class_hierachy inst.object_path
       @import.save inst
     end
-    
+
     def import_associations inst, from
-      puts "Import associations from #{inst}"
-      @wbem.each_association inst.object_path do |assoc|
+      puts "Import associations from #{inst.class}:#{inst}"
+      @wbem.each_association inst do |assoc|
         puts "Assoc #{assoc.class}:#{assoc}"
         unless @import.lookup assoc
-          to = import_instance assoc
+          create_class_hierachy assoc
+          to = @import.save assoc
           @import.create_edge from, to
           import_associations assoc, to
         end
