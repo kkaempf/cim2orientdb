@@ -41,7 +41,6 @@ module CIM2OrientDB
       end
       res = @client.lookup element.classname, doc
       return res if res
-      doc = Hash.new
       element.each_property do |name, value|
         doc[name] = value.to_s
       end
@@ -58,7 +57,7 @@ module CIM2OrientDB
         @client.get_class klass
         true
       rescue Orientdb4r::NotFoundError
-        # return nil
+        nil
       end
     end
     
